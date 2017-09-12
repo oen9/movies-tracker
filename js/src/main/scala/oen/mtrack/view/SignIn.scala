@@ -26,9 +26,7 @@ class SignIn extends HtmlView {
             )
           ),
           div(cls := "row",
-            button(cls := "btn waves-effect waves-light", tpe := "submit",
-              "submit", i(cls := "material-icons right", "send")
-            )
+            button(cls := "btn waves-effect waves-light", tpe := "submit", "Login", i(cls := "material-icons right", "send"))
           )
         )
       )
