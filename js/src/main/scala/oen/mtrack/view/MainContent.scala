@@ -31,7 +31,7 @@ class MainContent(htmlContentRouter: HtmlContentRouter,
         a(cls := "brand-logo center", href := "#", "Movies-Tracker"),
         ul(cls := "right",
           li(a(href := "#signin", "sign in")),
-          li(a(href := "#", "sign up")),
+          li(a(href := "#signup", "sign up")),
           li(a(href := "#", "logout"))
         )
       )

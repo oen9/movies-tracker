@@ -1,10 +1,11 @@
 package oen.mtrack.view
 
+import oen.mtrack.components.{SignInComp, StaticComponents}
 import org.scalajs.dom.html
 
 import scalatags.JsDom.all._
 
-class SignIn extends HtmlView {
+class SignIn(signInComp: SignInComp) extends HtmlView {
 
   override def get(): html.Div = {
     div(cls := "container center",
@@ -14,19 +15,22 @@ class SignIn extends HtmlView {
           div(cls := "row",
             div(cls := "input-field col s12",
               i(cls := "material-icons prefix", "account_circle"),
-              input(placeholder := "test", id := "login", tpe := "text", cls := "validate"),
-              label(`for` := "login", cls := "active", "login")
+              signInComp.name,
+              label(`for` := "name", cls := "active", "name")
             ),
           ),
           div(cls := "row",
             div(cls := "input-field col s12",
               i(cls := "material-icons prefix", "security"),
-              input(placeholder := "test", id := "password", tpe := "password", cls := "validate"),
+              signInComp.passwd,
               label(`for` := "password", cls := "active", "password")
             )
           ),
           div(cls := "row",
-            button(cls := "btn waves-effect waves-light", tpe := "submit", "Login", i(cls := "material-icons right", "send"))
+            signInComp.notification
+          ),
+          div(cls := "row",
+            signInComp.signInButton
           )
         )
       )

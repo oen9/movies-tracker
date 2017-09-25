@@ -1,6 +1,9 @@
 package oen.mtrack.materialize
 
+import org.scalajs.dom.raw.{Element, VisibilityState}
 import org.scalajs.jquery
+
+import scalatags.JsDom.all._
 
 class JQueryHelper {
   def initMaterialize(): Unit = {
@@ -15,5 +18,13 @@ class JQueryHelper {
 
   def refreshParallax(): Unit = {
     jquery.jQuery(".parallax").asInstanceOf[Parallax].parallax()
+  }
+
+  def hideElement(element: Element): Unit = {
+    element.setAttribute(hidden.v, VisibilityState.hidden.toString)
+  }
+
+  def showElement(element: Element): Unit = {
+    element.removeAttribute(hidden.v)
   }
 }

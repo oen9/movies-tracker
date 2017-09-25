@@ -5,6 +5,7 @@ import akka.event.Logging
 import akka.http.scaladsl.Http
 import akka.stream.ActorMaterializer
 import com.typesafe.config.ConfigFactory
+import oen.mtrack.actors.Auth
 
 import scala.concurrent.Future
 import scala.util.{Failure, Success}
@@ -18,7 +19,8 @@ object Main extends App {
   implicit val system = ActorSystem("movies-tracker", config)
   implicit val materializer = ActorMaterializer()
 
-  val api = new AppServiceApi(system)
+  val authActor = system.actorOf(Auth.props, Auth.name)
+  val api = new AppServiceApi(system, authActor)
 
   val bindingFuture: Future[Http.ServerBinding] = Http().bindAndHandle(api.routes, host, port = port)
 
