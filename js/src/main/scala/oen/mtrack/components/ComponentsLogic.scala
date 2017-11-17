@@ -42,7 +42,6 @@ class ComponentsLogic(staticComponents: StaticComponents,
         cacheData.data = cacheData.data.copy(username = Some(n), token = t)
         localStorageService.save()
 
-        println(s"Signed in as $n with token $t")
         signInComp.passwd.value = ""
         refreshHeader()
         dom.window.location.hash = "#dashboard"
@@ -81,5 +80,3 @@ class ComponentsLogic(staticComponents: StaticComponents,
     dom.window.location.hash = "#"
   }
 }
-
-

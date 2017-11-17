@@ -31,7 +31,7 @@ lazy val app = crossProject.in(file(".")).settings(
 lazy val fastOptJSDev = TaskKey[Unit]("fastOptJSDev")
 lazy val appJS = app.js
   .disablePlugins(RevolverPlugin)
-//  .enablePlugins(WorkbenchPlugin)
+  .enablePlugins(WorkbenchPlugin)
   .settings(
     fastOptJSDev := {
 

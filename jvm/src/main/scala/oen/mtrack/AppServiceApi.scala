@@ -1,11 +1,13 @@
 package oen.mtrack
 
 import akka.actor.{ActorRef, ActorSystem}
+import akka.http.scaladsl.Http
 import akka.http.scaladsl.model.headers.HttpChallenge
 import akka.http.scaladsl.server.AuthenticationFailedRejection.CredentialsRejected
 import akka.http.scaladsl.server.Directives._
 import akka.http.scaladsl.server.{AuthenticationFailedRejection, Route}
 import akka.pattern.ask
+import akka.stream.scaladsl.{Sink, Source}
 import akka.stream.{ActorMaterializer, ActorMaterializerSettings}
 import akka.util.Timeout
 import oen.mtrack.actors.Auth
@@ -34,7 +36,9 @@ trait AppService {
     securedApi ~
     login ~
     logout ~
-    getStaticDev
+    getStaticDev ~
+    workbenchFix
+
 
   def getStatic: Route = get {
     pathSingleSlash {
@@ -57,6 +61,19 @@ trait AppService {
     } ~
     path("movies-tracker-fastopt.js.map") {
       getFromResource("movies-tracker-fastopt.js.map")
+    }
+  }
+
+  def workbenchFix: Route = path("notifications") {
+    Route { context =>
+      val headersWithoutTimeoutAccess = context.request.headers.filterNot(_.name() == "Timeout-Access")
+      val request = context.request.copy(headers = headersWithoutTimeoutAccess)
+
+      val flow = Http(system).outgoingConnection(request.uri.authority.host.address(), 12345)
+      Source.single(request)
+        .via(flow)
+        .runWith(Sink.head)
+        .flatMap(context.complete(_))
     }
   }
 
