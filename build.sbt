@@ -1,4 +1,4 @@
-val akkaVersion = "2.5.4"
+val akkaVersion = "2.5.6"
 val akkaHttpVersion = "10.0.10"
 
 lazy val app = crossProject.in(file(".")).settings(
@@ -7,7 +7,7 @@ lazy val app = crossProject.in(file(".")).settings(
     "com.lihaoyi" %%% "scalatags" % "0.6.5",
     "com.lihaoyi" %%% "upickle" % "0.4.4"
   ),
-  scalaVersion := "2.12.3",
+  scalaVersion := "2.12.4",
   name := "movies-tracker"
 ).jsSettings(
   libraryDependencies ++= Seq(

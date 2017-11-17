@@ -5,13 +5,15 @@ import org.scalajs.dom.html
 
 class HtmlContentRouter(hello: HtmlView,
                        signIn: HtmlView,
-                       signUp: HtmlView
+                       signUp: HtmlView,
+                       dashboard: HtmlView
                        ) {
 
   def getCurrentContent(): html.Div = {
     readHash() match {
       case Some("signin") => signIn.get()
       case Some("signup") => signUp.get()
+      case Some("dashboard") => dashboard.get()
       case _ => hello.get()
     }
   }

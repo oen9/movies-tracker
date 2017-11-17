@@ -10,7 +10,7 @@ class SignUp extends HtmlView {
     div(cls := "container center",
       h2(cls := "header", "Sign in!"),
       div(cls := "row",
-        form(cls := "col s12",
+        form(cls := "col s12", method := "post",
           div(cls := "row",
             div(cls := "input-field col s12",
               i(cls := "material-icons prefix", "account_circle"),

@@ -1,7 +1,6 @@
 package oen.mtrack
 
 import akka.actor.{ActorRef, ActorSystem}
-import akka.http.javadsl.server.Rejections
 import akka.http.scaladsl.model.headers.HttpChallenge
 import akka.http.scaladsl.server.AuthenticationFailedRejection.CredentialsRejected
 import akka.http.scaladsl.server.Directives._

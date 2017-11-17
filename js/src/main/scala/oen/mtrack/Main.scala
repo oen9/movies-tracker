@@ -1,7 +1,7 @@
 package oen.mtrack
 
 import oen.mtrack.ajax.AjaxHelper
-import oen.mtrack.components.{CacheData, ComponentsLogic, StaticComponents}
+import oen.mtrack.components.{CacheData, ComponentsLogic, LocalStorageService, StaticComponents}
 import oen.mtrack.materialize.JQueryHelper
 import oen.mtrack.view._
 import org.scalajs.dom.html.Element
@@ -15,23 +15,28 @@ object Main {
   def main(header: Element, main: Element, footer: Element): Unit = {
     val jQueryHelper = new JQueryHelper
     val ajaxHelper = new AjaxHelper
-    val cacheData = new CacheData
+    val cacheData = new CacheData()
+    val localStorageService = new LocalStorageService(cacheData)
     val staticComponents = new StaticComponents
+
+    localStorageService.restoreSaved()
 
     val htmlContentRouter = new HtmlContentRouter(
       hello = new Hello with ParallaxView,
       signIn = new SignIn(staticComponents.signIn) with ParallaxView,
-      signUp = new SignUp with ParallaxView
+      signUp = new SignUp with ParallaxView,
+      dashboard = new Dashboard(cacheData) with ParallaxView
     )
 
-    val mc = new MainContent(htmlContentRouter, jQueryHelper)
+    val mc = new MainContent(htmlContentRouter, jQueryHelper, staticComponents.header)
     mc.init(header, main, footer)
 
     val componentsLogic = new ComponentsLogic(
       staticComponents = staticComponents,
       cacheData = cacheData,
       jQueryHelper = jQueryHelper,
-      ajaxHelper = ajaxHelper
+      ajaxHelper = ajaxHelper,
+      localStorageService = localStorageService
     )
 
     componentsLogic.init()

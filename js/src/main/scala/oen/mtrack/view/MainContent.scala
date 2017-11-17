@@ -1,5 +1,6 @@
 package oen.mtrack.view
 
+import oen.mtrack.components.HeaderComp
 import oen.mtrack.materialize.JQueryHelper
 import org.scalajs.dom
 import org.scalajs.dom.html
@@ -9,7 +10,9 @@ import scalatags.JsDom.all._
 import scalatags.JsDom.tags2
 
 class MainContent(htmlContentRouter: HtmlContentRouter,
-                  jQueryHelper: JQueryHelper) {
+                  jQueryHelper: JQueryHelper,
+                  headerComp: HeaderComp) {
+
   def init(header: html.Element, main: html.Element, footer: html.Element): Unit = {
     val headerC = initHeader()
     header.appendChild(headerC)
@@ -30,9 +33,10 @@ class MainContent(htmlContentRouter: HtmlContentRouter,
       div(cls := "nav-wrapper",
         a(cls := "brand-logo center", href := "#", "Movies-Tracker"),
         ul(cls := "right",
-          li(a(href := "#signin", "sign in")),
-          li(a(href := "#signup", "sign up")),
-          li(a(href := "#", "logout"))
+          headerComp.signin,
+          headerComp.signUp,
+          headerComp.dashboard,
+          headerComp.logout
         )
       )
     ).render
