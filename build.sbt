@@ -22,6 +22,7 @@ lazy val app = crossProject.in(file(".")).settings(
     "com.typesafe.akka" %% "akka-slf4j" % akkaVersion,
 
     "ch.qos.logback" % "logback-classic" % "1.1.3",
+    "org.mindrot" % "jbcrypt" % "0.4",
 
     "com.typesafe.akka" %% "akka-testkit" % akkaVersion % "test",
     "org.scalatest" %% "scalatest" % "3.0.1" % "test"

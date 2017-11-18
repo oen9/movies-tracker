@@ -90,7 +90,7 @@ class AuthTest() extends TestKit(ActorSystem("AuthTest")) with ImplicitSender
       expectMsgPF() { case t @ Token(Some(_)) => t }
     }
 
-    "reject registration for alredy existing name" in {
+    "reject registration for already existing name" in {
       val auth = system.actorOf(Auth.props)
       val credential = testCredential.copy(passwd = "somePasswd")
 

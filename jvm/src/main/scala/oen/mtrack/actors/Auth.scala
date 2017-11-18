@@ -5,14 +5,15 @@ import java.util.UUID
 import akka.actor.{Actor, ActorRef, PoisonPill, Props}
 import oen.mtrack.actors.Auth._
 import oen.mtrack.{Credential, Register, Token}
+import org.mindrot.jbcrypt.BCrypt
 
 class Auth extends Actor {
 
-  var credentials: Vector[Credential] = Vector(Credential("test", "test0"))
+  var credentials: Vector[Credential] = Vector(Credential("test", BCrypt.hashpw("test0", BCrypt.gensalt())))
   var loggeds: Set[Logged] = Set()
 
   override def receive = {
-    case c: Credential if credentials.contains(c) =>
+    case c: Credential if credentials.find(_.name == c.name).exists(found => BCrypt.checkpw(c.passwd, found.passwd)) =>
       val logged = getLogged(c)
       sender() ! logged.token
 
@@ -38,7 +39,7 @@ class Auth extends Actor {
         .find(_.name == c.name)
         .map(_ => RegisterFailed)
         .getOrElse({
-          credentials = credentials :+ c
+          credentials = credentials :+ c.copy(passwd = BCrypt.hashpw(c.passwd, BCrypt.gensalt()))
           RegisterSucced
         })
 
