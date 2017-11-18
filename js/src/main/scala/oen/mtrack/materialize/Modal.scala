@@ -3,7 +3,6 @@ package oen.mtrack.materialize
 import scala.scalajs.js
 import scala.scalajs.js.annotation.ScalaJSDefined
 
-@ScalaJSDefined
 class ModalOptions extends js.Object {
   var dismissible: Boolean = true
 }

@@ -4,7 +4,7 @@ val akkaHttpVersion = "10.0.10"
 lazy val app = crossProject.in(file(".")).settings(
   unmanagedSourceDirectories in Compile += baseDirectory.value  / "shared" / "main" / "scala",
   libraryDependencies ++= Seq(
-    "com.lihaoyi" %%% "scalatags" % "0.6.5",
+    "com.lihaoyi" %%% "scalatags" % "0.6.7",
     "com.lihaoyi" %%% "upickle" % "0.4.4"
   ),
   scalaVersion := "2.12.4",
@@ -50,7 +50,8 @@ lazy val appJS = app.js
       val fastOptMapFrom = fastOptFrom.getParentFile / mapFileName
       val fastOptMapTo = new File(baseDirectory.value, targetRes + mapFileName)
       IO.copyFile(fastOptMapFrom, fastOptMapTo)
-    }
+    },
+    scalacOptions += "-P:scalajs:sjsDefinedByDefault"
   )
 
 lazy val appJVM = app.jvm.settings(

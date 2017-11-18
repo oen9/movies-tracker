@@ -3,7 +3,6 @@ package oen.mtrack.materialize
 import scala.scalajs.js
 import scala.scalajs.js.annotation.ScalaJSDefined
 
-@ScalaJSDefined
 class TooltipsOptions extends js.Object {
   var delay: Int = 50
 }
