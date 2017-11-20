@@ -27,7 +27,7 @@ class AjaxHelper {
     }
   }
 
-  def signUp(reg: Register, onSucced: => Unit, onFailed: Unit): Unit = {
+  def signUp(reg: Register, onSucced: => Unit, onFailed: => Unit): Unit = {
     val data = Data.toJson(reg)
 
     Ajax.post("/register", data, headers = headers).onComplete {
