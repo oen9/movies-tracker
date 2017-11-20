@@ -2,6 +2,7 @@ package oen.mtrack
 
 import akka.actor.{ActorRef, ActorSystem}
 import akka.http.scaladsl.Http
+import akka.http.scaladsl.model.StatusCodes
 import akka.http.scaladsl.model.headers.HttpChallenge
 import akka.http.scaladsl.server.AuthenticationFailedRejection.CredentialsRejected
 import akka.http.scaladsl.server.Directives._
@@ -11,7 +12,7 @@ import akka.stream.scaladsl.{Sink, Source}
 import akka.stream.{ActorMaterializer, ActorMaterializerSettings}
 import akka.util.Timeout
 import oen.mtrack.actors.Auth
-import oen.mtrack.actors.Auth.{LoggedOut, Logout}
+import oen.mtrack.actors.Auth.{LoggedOut, Logout, RegisterSucced}
 import oen.mtrack.akkahttpsupport.UpickleSupport._
 import oen.mtrack.directives.AuthDirectives.auth
 
@@ -36,6 +37,7 @@ trait AppService {
     securedApi ~
     login ~
     logout ~
+    register ~
     getStaticDev ~
     workbenchFix
 
@@ -83,6 +85,17 @@ trait AppService {
         onSuccess(authActor ? data) {
           case t @ Token(Some(_)) => complete(t)
           case _ => reject(AuthenticationFailedRejection(CredentialsRejected, HttpChallenge("none", None)))
+        }
+      }
+    }
+  }
+
+  def register: Route = post {
+    pathPrefix("register") {
+      entity(as[Data]) { data =>
+        onSuccess(authActor ? data) {
+          case RegisterSucced => complete(StatusCodes.Created)
+          case _ => complete(StatusCodes.Conflict)
         }
       }
     }
