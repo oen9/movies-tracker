@@ -59,6 +59,6 @@ class MainContent(htmlContentRouter: HtmlContentRouter,
     main.innerHTML = ""
     val mainContent = initMain()
     main.appendChild(mainContent)
-    jQueryHelper.refreshParallax()
+    jQueryHelper.initMaterialize()
   }
 }

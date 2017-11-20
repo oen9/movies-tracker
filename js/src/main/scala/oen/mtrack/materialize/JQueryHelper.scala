@@ -10,6 +10,7 @@ class JQueryHelper {
     jquery.jQuery(".modal").asInstanceOf[ModalOperations].modal(new ModalOptions { dismissible = false })
     refreshTooltips()
     refreshParallax()
+    refreshCollapsaible()
   }
 
   def refreshTooltips(): Unit = {
@@ -18,6 +19,10 @@ class JQueryHelper {
 
   def refreshParallax(): Unit = {
     jquery.jQuery(".parallax").asInstanceOf[Parallax].parallax()
+  }
+
+  def refreshCollapsaible(): Unit = {
+    jquery.jQuery(".collapsible").asInstanceOf[Collapsible].collapsible()
   }
 
   def hideElement(element: Element): Unit = {
