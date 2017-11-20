@@ -24,7 +24,7 @@ object Main {
     val htmlContentRouter = new HtmlContentRouter(
       hello = new Hello with ParallaxView,
       signIn = new SignIn(staticComponents.signIn) with ParallaxView,
-      signUp = new SignUp with ParallaxView,
+      signUp = new SignUp(staticComponents.signUp) with ParallaxView,
       dashboard = new Dashboard(cacheData) with ParallaxView
     )
 

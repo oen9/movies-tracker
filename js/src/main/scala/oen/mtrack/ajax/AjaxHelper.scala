@@ -1,16 +1,17 @@
 package oen.mtrack.ajax
 
-import oen.mtrack.{Credential, Data, Token}
+import oen.mtrack.{Credential, Data, Register, Token}
 import org.scalajs.dom.ext.Ajax
 
 import scala.util.{Failure, Success}
 
 class AjaxHelper {
+
   import scala.concurrent.ExecutionContext.Implicits.global
 
   val headers = Map("Content-type" -> "application/json")
 
-  def signIn(credential: Credential, onSucced: Token => Unit, onUnauth: => Unit = {}): Unit = {
+  def signIn(credential: Credential, onSucced: Token => Unit, onFailed: => Unit = {}): Unit = {
     val data = Data.toJson(credential)
 
     Ajax.post("/login", data, headers = headers).onComplete {
@@ -22,7 +23,23 @@ class AjaxHelper {
           case e => println("unexpected: " + e)
       }
       case Failure(e) =>
-        onUnauth
+        onFailed
+    }
+  }
+
+  def signUp(reg: Register, onSucced: => Unit, onFailed: Unit): Unit = {
+    val data = Data.toJson(reg)
+
+    Ajax.post("/register", data, headers = headers).onComplete {
+      case Success(_) => onSucced
+      case Failure(_) => onFailed
+    }
+  }
+
+  def logout(token: Token, onSucced: => Unit, onFailed: => Unit = {}): Unit = token.value.foreach { t =>
+    Ajax.post(s"/logout?token=$t", headers = headers).onComplete {
+      case Success(_) => onSucced
+      case Failure(_) => onFailed
     }
   }
 }

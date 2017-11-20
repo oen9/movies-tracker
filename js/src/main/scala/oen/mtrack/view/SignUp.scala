@@ -1,39 +1,43 @@
 package oen.mtrack.view
 
+import oen.mtrack.components.SignUpComp
 import org.scalajs.dom.html
 
 import scalatags.JsDom.all._
 
-class SignUp extends HtmlView {
+class SignUp(signUpComp: SignUpComp) extends HtmlView {
 
   override def get(): html.Div = {
     div(cls := "container center",
-      h2(cls := "header", "Sign in!"),
+      h2(cls := "header", "Sign up!"),
       div(cls := "row",
         form(cls := "col s12", method := "post",
           div(cls := "row",
             div(cls := "input-field col s12",
               i(cls := "material-icons prefix", "account_circle"),
-              input(placeholder := "your new login", id := "login", tpe := "text", cls := "validate"),
+              signUpComp.name,
               label(`for` := "login", cls := "active", "login")
             ),
           ),
            div(cls := "row",
             div(cls := "input-field col s12",
               i(cls := "material-icons prefix", "security"),
-              input(placeholder := "password", id := "password", tpe := "password", cls := "validate"),
+              signUpComp.passwd,
               label(`for` := "password", cls := "active", "password")
             )
           ),
           div(cls := "row",
             div(cls := "input-field col s12",
               i(cls := "material-icons prefix", "security"),
-              input(placeholder := "again password", id := "password2", tpe := "password", cls := "validate"),
+              signUpComp.passwd2,
               label(`for` := "password2", cls := "active", "password")
             )
           ),
           div(cls := "row",
-            button(cls := "btn waves-effect waves-light", tpe := "submit", "sign up!", i(cls := "material-icons right", "send"))
+            signUpComp.notification
+          ),
+          div(cls := "row",
+            signUpComp.signUpButton
           )
         )
       )

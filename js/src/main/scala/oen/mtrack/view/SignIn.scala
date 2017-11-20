@@ -1,6 +1,6 @@
 package oen.mtrack.view
 
-import oen.mtrack.components.{SignInComp, StaticComponents}
+import oen.mtrack.components.SignInComp
 import org.scalajs.dom.html
 
 import scalatags.JsDom.all._

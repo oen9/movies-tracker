@@ -1,6 +1,6 @@
 package oen.mtrack.components
 
-import oen.mtrack.Credential
+import oen.mtrack.{Credential, Register}
 import oen.mtrack.ajax.AjaxHelper
 import oen.mtrack.materialize.JQueryHelper
 import org.scalajs.dom
@@ -14,13 +14,13 @@ class ComponentsLogic(staticComponents: StaticComponents,
 
   def init(): Unit = {
     initSignIn()
+    initSignUp()
     initLogout()
 
     refreshHeader()
 
     jQueryHelper.initMaterialize()
   }
-
 
   protected def initSignIn() = {
     val signInComp = staticComponents.signIn
@@ -45,11 +45,44 @@ class ComponentsLogic(staticComponents: StaticComponents,
         signInComp.passwd.value = ""
         refreshHeader()
         dom.window.location.hash = "#dashboard"
-      }, {
-        jQueryHelper.showElement(signInComp.notification)
-      })
+      }, jQueryHelper.showElement(signInComp.notification))
     }
 
+  }
+
+  protected def initSignUp() = {
+    val signUpComp = staticComponents.signUp
+    signUpComp.signUpButton.onclick = _ => signUp()
+    signUpComp.name.onkeydown = (e: KeyboardEvent) => if ("Enter" == e.key) signUp()
+    signUpComp.passwd.onkeydown = (e: KeyboardEvent) => if ("Enter" == e.key) signUp()
+    signUpComp.passwd2.onkeydown = (e: KeyboardEvent) => if ("Enter" == e.key) signUp()
+  }
+
+  protected def signUp() = {
+    val signUpComp = staticComponents.signUp
+    val name = Some(signUpComp.name.value).filter(!_.isEmpty)
+    val passwd = Some(signUpComp.passwd.value).filter(!_.isEmpty)
+    val passwd2 = Some(signUpComp.passwd2.value).filter(!_.isEmpty)
+
+    for { n <- name
+          p <- passwd
+          p2 <- passwd2 } {
+
+      if (p == p2) {
+        jQueryHelper.hideElement(signUpComp.notification)
+        val reg = Register(Credential(n, p))
+
+        ajaxHelper.signUp(reg, {
+          signUpComp.passwd.value = ""
+          signUpComp.passwd2.value = ""
+          staticComponents.signIn.name.value = n
+          dom.window.location.hash = "#signin"
+        }, jQueryHelper.showElement(signUpComp.notification))
+
+      } else {
+        jQueryHelper.showElement(signUpComp.notification)
+      }
+    }
   }
 
   protected def refreshHeader() = {
@@ -72,11 +105,12 @@ class ComponentsLogic(staticComponents: StaticComponents,
     headerComp.logout.onclick = _ => logout()
   }
 
-  protected def logout() = {
+  protected def logout() = ajaxHelper.logout(cacheData.data.token, {
     cacheData.data = ImmutableCacheData()
     localStorageService.clearSaved()
 
     refreshHeader()
-    dom.window.location.hash = "#"
-  }
+    dom.window.location.hash = "#signin"
+  })
+
 }
