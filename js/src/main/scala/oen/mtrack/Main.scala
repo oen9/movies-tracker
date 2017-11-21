@@ -25,7 +25,7 @@ object Main {
       hello = new Hello with ParallaxView,
       signIn = new SignIn(staticComponents.signIn) with ParallaxView,
       signUp = new SignUp(staticComponents.signUp) with ParallaxView,
-      dashboard = new Dashboard(cacheData) with ParallaxView
+      dashboard = new Dashboard(cacheData) with ParallaxView with OnlyLoggedView
     )
 
     val mc = new MainContent(htmlContentRouter, jQueryHelper, staticComponents.header)

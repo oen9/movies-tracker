@@ -5,7 +5,7 @@ import org.scalajs.dom.html
 
 import scalatags.JsDom.all._
 
-class Dashboard(cacheData: CacheData) extends HtmlView {
+class Dashboard(val cacheData: CacheData) extends HtmlView {
 
   override def get(): html.Div = {
     val username = cacheData.data.username.getOrElse("unknown")
