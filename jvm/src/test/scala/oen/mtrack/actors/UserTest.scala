@@ -1,7 +1,8 @@
 package oen.mtrack.actors
 
-import akka.actor.ActorSystem
+import akka.actor.{ActorRef, ActorSystem, Props}
 import akka.testkit.{ImplicitSender, TestKit}
+import oen.mtrack.{Movie, Movies, Season}
 import org.scalatest.{BeforeAndAfterAll, Matchers, WordSpecLike}
 
 class UserTest() extends TestKit(ActorSystem("UserTest")) with ImplicitSender
@@ -11,13 +12,77 @@ class UserTest() extends TestKit(ActorSystem("UserTest")) with ImplicitSender
     TestKit.shutdownActorSystem(system)
   }
 
+  val testName = "test321"
+  val exampleMovie1 = Movie(19, "Mr. Robot", Vector(Season(1, 10), Season(2, 10)), "/123.jpg", "/456.jpg", Season(1, 9))
+  val exampleMovie2 = Movie(322, "Dexter", Vector(Season(1, 12), Season(2, 12), Season(3, 12)), "/abc.jpg", "/def.jpg", Season(3, 12))
+  val exampleMovie3 = Movie(123, "Himym", Vector(Season(1, 24), Season(2, 24), Season(3, 24), Season(4, 24)), "/ha.jpg", "/hb.jpg")
+  val dataToUpdateMovie3 = Movie(123, "Himym", Vector(Season(1, 24), Season(2, 24), Season(3, 24), Season(4, 24), Season(5,24)), "/ha.jpg", "/hb.jpg")
+  val exampleMovies = Map(exampleMovie1.id -> exampleMovie1, exampleMovie2.id -> exampleMovie2)
+
   "An User actor" should {
 
     "return name" in {
-      val testName = "test321"
       val user = system.actorOf(User.props(testName))
       user ! User.GetName
       expectMsg(testName)
+    }
+
+    "return movies list" in {
+      val user = system.actorOf(User.props(testName, exampleMovies))
+      user ! User.GetMovies
+      expectMsg(Movies(IndexedSeq(exampleMovie1, exampleMovie2)))
+    }
+
+    "remove movie" in {
+      val user = system.actorOf(User.props(testName, exampleMovies))
+      user ! User.RemoveMovie(exampleMovie1.id)
+      expectMsg(User.Success)
+      user ! User.GetMovies
+      expectMsg(Movies(IndexedSeq(exampleMovie2)))
+    }
+
+    "update current season" in {
+      val user = system.actorOf(User.props(testName, exampleMovies))
+
+      val newSeason = Season(9, 99)
+      user ! User.UpdateCurrentSeason(exampleMovie2.id, newSeason)
+      expectMsg(User.Success)
+
+      user ! User.GetMovies
+      expectMsgClass(classOf[Movies])
+        .movies
+        .find(_.id == exampleMovie2.id)
+        .fold(fail("movie not found"))(m => assert(m.currentSeason == newSeason))
+    }
+
+    "add new movie" in {
+      val props = Props(new User(testName, Map()) {
+        override def fetchMovie(id: Int, toRespond: ActorRef): Unit = self ! User.ToAdd(toRespond, exampleMovie3)
+      })
+
+      val user = system.actorOf(props)
+      user ! User.AddOrUpdateMovie(exampleMovie3.id)
+      expectMsg(exampleMovie3)
+
+      user ! User.GetMovies
+      expectMsg(Movies(IndexedSeq(exampleMovie3)))
+    }
+
+    "update movie without changing current season" in {
+      val testId = exampleMovie3.id
+      val testSeason = Season(2, 22)
+      val updatedMovie = dataToUpdateMovie3.copy(id = testId, currentSeason = testSeason)
+
+      val props = Props(new User(testName, Map(exampleMovie3.id -> exampleMovie3.copy(currentSeason = testSeason))) {
+        override def fetchMovie(id: Int, toRespond: ActorRef): Unit = self ! User.ToAdd(toRespond, dataToUpdateMovie3.copy(id = id))
+      })
+
+      val user = system.actorOf(props)
+      user ! User.AddOrUpdateMovie(testId)
+      expectMsg(updatedMovie)
+
+      user ! User.GetMovies
+      expectMsg(Movies(IndexedSeq(updatedMovie)))
     }
 
   }

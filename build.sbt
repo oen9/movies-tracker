@@ -20,6 +20,7 @@ lazy val app = crossProject.in(file(".")).settings(
     "com.typesafe.akka" %% "akka-actor" % akkaVersion,
     "com.typesafe.akka" %% "akka-stream" % akkaVersion,
     "com.typesafe.akka" %% "akka-slf4j" % akkaVersion,
+    "com.typesafe.akka" %% "akka-http-spray-json" % akkaHttpVersion,
 
     "ch.qos.logback" % "logback-classic" % "1.1.3",
     "org.mindrot" % "jbcrypt" % "0.4",
