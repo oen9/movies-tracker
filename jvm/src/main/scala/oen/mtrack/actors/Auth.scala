@@ -4,13 +4,21 @@ import java.util.UUID
 
 import akka.actor.{Actor, ActorRef, PoisonPill, Props}
 import oen.mtrack.actors.Auth._
+import oen.mtrack.config.ConfigHelper
+import oen.mtrack.config.ConfigHelper.dev
 import oen.mtrack.{Credential, Register, Token}
 import org.mindrot.jbcrypt.BCrypt
 
 class Auth extends Actor {
-
-  var credentials: Vector[Credential] = Vector(Credential("test", BCrypt.hashpw("test0", BCrypt.gensalt())))
+  var credentials: Vector[Credential] = Vector(Credential(TEST_NAME, BCrypt.hashpw(TEST_PASSWD, BCrypt.gensalt())))
   var loggeds: Set[Logged] = Set()
+
+  implicit val profile = ConfigHelper.getProfile(context.system.settings.config)
+  dev {
+    val newUserActor = context.actorOf(User.props(TEST_NAME), User.name(TEST_NAME))
+    val newLogged = Logged(Credential(TEST_NAME, TEST_PASSWD), Token(Some(TEST_NAME)), newUserActor)
+    loggeds = loggeds + newLogged
+  }
 
   override def receive = {
     case c: Credential if credentials.find(_.name == c.name).exists(found => BCrypt.checkpw(c.passwd, found.passwd)) =>
@@ -79,4 +87,7 @@ object Auth {
 
   case class UserRef(ref: Option[ActorRef])
   case class Logged(credential: Credential, token: Token, actorRef: ActorRef)
+
+  val TEST_NAME = "test"
+  val TEST_PASSWD = "test0"
 }

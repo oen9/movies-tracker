@@ -11,7 +11,7 @@ import akka.pattern.ask
 import akka.stream.scaladsl.{Sink, Source}
 import akka.stream.{ActorMaterializer, ActorMaterializerSettings}
 import akka.util.Timeout
-import oen.mtrack.actors.Auth
+import oen.mtrack.actors.{Auth, User}
 import oen.mtrack.actors.Auth.{LoggedOut, Logout, RegisterSucced}
 import oen.mtrack.akkahttpsupport.UpickleSupport._
 import oen.mtrack.directives.AuthDirectives.auth
@@ -38,9 +38,9 @@ trait AppService {
     login ~
     logout ~
     register ~
+    moviesOperations ~
     getStaticDev ~
     workbenchFix
-
 
   def getStatic: Route = get {
     pathSingleSlash {
@@ -107,6 +107,32 @@ trait AppService {
         onSuccess(authActor ? Logout(Token(Some(t)))) {
           case LoggedOut => complete("ok")
           case _ => reject(AuthenticationFailedRejection(CredentialsRejected, HttpChallenge("none", None)))
+        }
+      }
+    }
+  }
+
+  def moviesOperations: Route = pathPrefix("movies") {
+    auth(authenticator) { user =>
+      def askUser(cmd: User.cmd): Route = {
+        onSuccess(user ? cmd) {
+          case m: Data => complete(m)
+          case User.Success => complete(StatusCodes.NoContent)
+          case _ => complete(StatusCodes.InternalServerError)
+        }
+      }
+
+      get {
+        pathPrefix("get-movies") { askUser(User.GetMovies) }
+      } ~
+      post {
+        pathPrefix("add-or-update" / IntNumber) { id => askUser(User.AddOrUpdateMovie(id)) } ~
+        pathPrefix("remove" / IntNumber) { id => askUser(User.RemoveMovie(id)) } ~
+        pathPrefix("update-season"/ IntNumber) { id =>
+          entity(as[Data]) {
+            case s: Season => askUser(User.UpdateCurrentSeason(id, s))
+            case _ => complete(StatusCodes.BadRequest)
+          }
         }
       }
     }

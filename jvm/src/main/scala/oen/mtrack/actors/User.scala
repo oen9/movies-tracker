@@ -67,13 +67,13 @@ object User {
   def props(name: String, movies: Map[Int, Movie] = Map()) = Props(new User(name, movies))
   def name(username: String) = s"user-$username"
 
-  case object GetName
-  case object GetMovies
-  case object Success
-  case class AddOrUpdateMovie(id: Int)
-  case class RemoveMovie(id: Int)
-  case class UpdateMovie(id: Int)
-  case class UpdateCurrentSeason(id: Int, season: Season)
+  trait cmd
+  case object GetName extends cmd
+  case object GetMovies extends cmd
+  case object Success extends cmd
+  case class AddOrUpdateMovie(id: Int) extends cmd
+  case class RemoveMovie(id: Int) extends cmd
+  case class UpdateCurrentSeason(id: Int, season: Season) extends cmd
 
   case class ToAdd(toResponse: ActorRef, movie: Movie)
 }
