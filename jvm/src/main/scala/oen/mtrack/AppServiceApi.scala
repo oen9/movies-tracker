@@ -123,7 +123,10 @@ trait AppService {
       }
 
       get {
-        pathPrefix("get-movies") { askUser(User.GetMovies) }
+        pathPrefix("get-movies") { askUser(User.GetMovies) } ~
+        pathPrefix("search") {
+          parameter("query") { query => askUser(User.Search(query)) }
+        }
       } ~
       post {
         pathPrefix("add-or-update" / IntNumber) { id => askUser(User.AddOrUpdateMovie(id)) } ~

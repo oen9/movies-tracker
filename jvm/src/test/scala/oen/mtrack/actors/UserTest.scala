@@ -2,7 +2,7 @@ package oen.mtrack.actors
 
 import akka.actor.{ActorRef, ActorSystem, Props}
 import akka.testkit.{ImplicitSender, TestKit}
-import oen.mtrack.{Movie, Movies, Season}
+import oen.mtrack._
 import org.scalatest.{BeforeAndAfterAll, Matchers, WordSpecLike}
 
 class UserTest() extends TestKit(ActorSystem("UserTest")) with ImplicitSender
@@ -18,6 +18,8 @@ class UserTest() extends TestKit(ActorSystem("UserTest")) with ImplicitSender
   val exampleMovie3 = Movie(123, "Himym", Vector(Season(1, 24), Season(2, 24), Season(3, 24), Season(4, 24)), "/ha.jpg", "/hb.jpg")
   val dataToUpdateMovie3 = Movie(123, "Himym", Vector(Season(1, 24), Season(2, 24), Season(3, 24), Season(4, 24), Season(5,24)), "/ha.jpg", "/hb.jpg")
   val exampleMovies = Map(exampleMovie1.id -> exampleMovie1, exampleMovie2.id -> exampleMovie2)
+
+  val exampleSearchMovie1 = SearchMovie(632, "Dragon", Some("/ssss.jpg"))
 
   "An User actor" should {
 
@@ -83,6 +85,19 @@ class UserTest() extends TestKit(ActorSystem("UserTest")) with ImplicitSender
 
       user ! User.GetMovies
       expectMsg(Movies(IndexedSeq(updatedMovie)))
+    }
+
+    "search movies by query" in {
+      val props = Props(new User(testName, exampleMovies) {
+        override def search(query: String, toRespond: ActorRef): Unit = toRespond ! SearchMovies(IndexedSeq(exampleSearchMovie1))
+      })
+
+      val user = system.actorOf(props)
+      user ! User.Search("example query")
+      expectMsg(SearchMovies(IndexedSeq(exampleSearchMovie1)))
+
+      user ! User.GetMovies
+      expectMsg(Movies(exampleMovies.values.toIndexedSeq))
     }
 
   }

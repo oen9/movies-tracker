@@ -19,6 +19,13 @@ sealed trait Data
 @key("season") case class Season(season: Int = 1, episode: Int = 1) extends Data
 @key("movies") case class Movies(movies: IndexedSeq[Movie]) extends Data
 
+@key("search-movie") case class SearchMovie(
+  id: Int,
+  name: String,
+  poster: Option[String]
+) extends Data
+@key("search-movies") case class SearchMovies(movies: IndexedSeq[SearchMovie]) extends Data
+
 object Data {
   def toJson(data: Data): String = {
     upickle.default.write(data)

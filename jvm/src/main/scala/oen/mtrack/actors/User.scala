@@ -1,13 +1,15 @@
 package oen.mtrack.actors
 
+import java.net.URLEncoder
+
 import akka.actor.{Actor, ActorRef, Props}
 import akka.http.scaladsl.Http
 import akka.http.scaladsl.model.HttpRequest
 import akka.http.scaladsl.unmarshalling.Unmarshal
 import akka.stream.{ActorMaterializer, ActorMaterializerSettings}
 import oen.mtrack.actors.User._
-import oen.mtrack.json.TmdbMovie
-import oen.mtrack.{Movie, Movies, Season}
+import oen.mtrack.json.{TmdbMovie, TmdbSearchResult}
+import oen.mtrack._
 
 class User(name: String, var movies: Map[Int, Movie]) extends Actor {
   final implicit val materializer: ActorMaterializer = ActorMaterializer(ActorMaterializerSettings(context.system))
@@ -38,6 +40,10 @@ class User(name: String, var movies: Map[Int, Movie]) extends Actor {
       val newOrUpdatedMovie = movies.get(m.id).fold(m)(oldM => m.copy(currentSeason = oldM.currentSeason))
       movies = movies + (m.id -> newOrUpdatedMovie)
       toResponse ! newOrUpdatedMovie
+
+    case Search(query) =>
+      val toRespond = sender()
+      search(query, toRespond)
   }
 
   def fetchMovie(id: Int, toRespond: ActorRef): Unit = {
@@ -63,6 +69,29 @@ class User(name: String, var movies: Map[Int, Movie]) extends Actor {
 
     toAdd.pipeTo(self)
   }
+
+  def search(query: String, toRespond: ActorRef): Unit = {
+    import TmdbMovie._
+    import akka.http.scaladsl.marshallers.sprayjson.SprayJsonSupport._
+    import akka.pattern.pipe
+    import context.dispatcher
+
+    val encodedQuery = URLEncoder.encode(query, "UTF-8")
+    val results = for {
+      request <- Http(context.system).singleRequest(HttpRequest(uri = s"https://api.themoviedb.org/3/search/tv?api_key=$tmdbApiKey&query=$encodedQuery"))
+      tmdbSearchResults <- Unmarshal(request.entity).to[TmdbSearchResult]
+    } yield {
+      tmdbSearchResults.results.map { tmdbMovie =>
+        SearchMovie(
+          id = tmdbMovie.id,
+          name = tmdbMovie.name,
+          poster = tmdbMovie.poster_path
+        )
+      }
+    }
+
+    results.map(SearchMovies).pipeTo(toRespond)
+  }
 }
 
 object User {
@@ -76,6 +105,7 @@ object User {
   case class AddOrUpdateMovie(id: Int) extends cmd
   case class RemoveMovie(id: Int) extends cmd
   case class UpdateCurrentSeason(id: Int, season: Season) extends cmd
+  case class Search(query: String) extends cmd
 
   case class ToAdd(toResponse: ActorRef, movie: Movie)
 }
