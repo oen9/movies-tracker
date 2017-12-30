@@ -16,7 +16,7 @@ sealed trait Data
   backdrop: String,
   currentSeason: Season = Season()
 ) extends Data
-@key("season") case class Season(season: Int = 0, episode: Int = 0) extends Data
+@key("season") case class Season(season: Int = 1, episode: Int = 1) extends Data
 @key("movies") case class Movies(movies: IndexedSeq[Movie]) extends Data
 
 object Data {

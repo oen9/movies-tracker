@@ -1,6 +1,6 @@
 package oen.mtrack.view
 
-import oen.mtrack.components.HeaderComp
+import oen.mtrack.components.{HeaderComp, HtmlContentRouter}
 import oen.mtrack.materialize.JQueryHelper
 import org.scalajs.dom
 import org.scalajs.dom.html

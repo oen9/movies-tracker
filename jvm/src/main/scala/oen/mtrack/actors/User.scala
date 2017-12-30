@@ -49,12 +49,14 @@ class User(name: String, var movies: Map[Int, Movie]) extends Actor {
       request <- Http(context.system).singleRequest(HttpRequest(uri = s"https://api.themoviedb.org/3/tv/$id?api_key=$tmdbApiKey"))
       tmdbMovie <- Unmarshal(request.entity).to[TmdbMovie]
     } yield {
+      val seasons = tmdbMovie.seasons.filterNot(_.season_number == 0).map(s => Season(s.season_number, s.episode_count))
       val movie = Movie(
         id = tmdbMovie.id,
         name = tmdbMovie.name,
         poster = tmdbMovie.poster_path,
         backdrop =  tmdbMovie.backdrop_path,
-        seasons = tmdbMovie.seasons.filterNot(_.season_number == 0).map(s => Season(s.season_number, s.episode_count))
+        seasons = seasons,
+        currentSeason = seasons.headOption.map(_.copy(episode = 1)).getOrElse(Season())
       )
       ToAdd(toRespond, movie)
     }

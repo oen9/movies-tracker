@@ -2,6 +2,7 @@ package oen.mtrack.materialize
 
 import org.scalajs.dom.raw.{Element, VisibilityState}
 import org.scalajs.jquery
+import JQueryHelper._
 
 import scalatags.JsDom.all._
 
@@ -32,4 +33,16 @@ class JQueryHelper {
   def showElement(element: Element): Unit = {
     element.removeAttribute(hidden.v)
   }
+
+  def disableElement(element: Element): Unit = {
+    element.classList.add(DISABLED)
+  }
+
+  def enableElement(element: Element): Unit = {
+    element.classList.remove(DISABLED)
+  }
+}
+
+object JQueryHelper {
+  val DISABLED: String = "disabled"
 }

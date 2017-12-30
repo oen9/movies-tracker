@@ -1,9 +1,11 @@
-package oen.mtrack.view
+package oen.mtrack.components
 
+import oen.mtrack.view.HtmlView
 import org.scalajs.dom
 import org.scalajs.dom.html
 
-class HtmlContentRouter(hello: HtmlView,
+class HtmlContentRouter(componentsLogic: ComponentsLogic,
+                       hello: HtmlView,
                        signIn: HtmlView,
                        signUp: HtmlView,
                        dashboard: HtmlView
@@ -13,7 +15,9 @@ class HtmlContentRouter(hello: HtmlView,
     readHash() match {
       case Some("signin") => signIn.get()
       case Some("signup") => signUp.get()
-      case Some("dashboard") => dashboard.get()
+      case Some("dashboard") =>
+        componentsLogic.init()
+        dashboard.get()
       case _ => hello.get()
     }
   }

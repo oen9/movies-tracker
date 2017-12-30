@@ -12,7 +12,10 @@ case class TmdbMovie(
 
 case class TmdbSeason(episode_count: Int, season_number: Int)
 
+case class TmdbSearchResult(results: IndexedSeq[TmdbMovie])
+
 object TmdbMovie {
   implicit val tmdbSeasonFormat = jsonFormat2(TmdbSeason)
   implicit val tmdbMovieFormat = jsonFormat5(TmdbMovie.apply)
+  implicit val tmdbSearchResult = jsonFormat1(TmdbSearchResult)
 }

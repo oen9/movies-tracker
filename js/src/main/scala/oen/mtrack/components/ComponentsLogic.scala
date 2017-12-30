@@ -1,25 +1,39 @@
 package oen.mtrack.components
 
-import oen.mtrack.{Credential, Register}
+import oen.mtrack.{Credential, Movies, Register}
 import oen.mtrack.ajax.AjaxHelper
+import oen.mtrack.ajax.AjaxHelper.AjaxExceptionHandler
 import oen.mtrack.materialize.JQueryHelper
+import oen.mtrack.view.MovieListDresser
 import org.scalajs.dom
+import org.scalajs.dom.XMLHttpRequest
 import org.scalajs.dom.raw.KeyboardEvent
 
 class ComponentsLogic(staticComponents: StaticComponents,
                       cacheData: CacheData,
                       jQueryHelper: JQueryHelper,
                       ajaxHelper: AjaxHelper,
-                      localStorageService: LocalStorageService) {
+                      localStorageService: LocalStorageService,
+                      htmlDresser: MovieListDresser) {
 
   def init(): Unit = {
     initSignIn()
     initSignUp()
     initLogout()
+    initDashboard()
 
     refreshHeader()
 
     jQueryHelper.initMaterialize()
+  }
+
+  def initDashboard() = {
+    def onSucced(m: Movies) = {
+      cacheData.data = cacheData.data.copy(movies = m)
+      staticComponents.dashboard.moviesList.innerHTML = ""
+      m.movies.map(htmlDresser.dressMovie(_, onUnauthorized)).foreach(staticComponents.dashboard.moviesList.appendChild)
+    }
+    ajaxHelper.loadMovies(cacheData.data.token, onSucced, onUnauthorized)
   }
 
   protected def initSignIn() = {
@@ -102,15 +116,23 @@ class ComponentsLogic(staticComponents: StaticComponents,
 
   protected def initLogout() = {
     val headerComp = staticComponents.header
-    headerComp.logout.onclick = _ => logout()
+    headerComp.logout.onclick = _ => execLogout()
   }
 
-  protected def logout() = ajaxHelper.logout(cacheData.data.token, {
+  protected def execLogout() = {
+    ajaxHelper.logout(cacheData.data.token, logout, onUnauthorized)
+  }
+
+  protected def logout() = {
     cacheData.data = ImmutableCacheData()
     localStorageService.clearSaved()
 
     refreshHeader()
     dom.window.location.hash = "#signin"
-  })
+  }
+
+  protected def onUnauthorized: AjaxExceptionHandler = {
+    case x: XMLHttpRequest if x.status == 401 => logout()
+  }
 
 }

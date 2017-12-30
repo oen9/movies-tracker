@@ -22,6 +22,12 @@ main {
     overflow: auto;
 }
 
+.scrollable-mini {
+    min-height: 0;
+    max-height: 50vh;
+    overflow: auto;
+}
+
 .page-footer {
     padding-top: 0;
 }

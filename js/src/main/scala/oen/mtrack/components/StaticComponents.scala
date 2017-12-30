@@ -8,7 +8,8 @@ case class StaticComponents (
   progressbar: Div = div(cls := "progress", div(cls := "indeterminate")).render,
   header: HeaderComp = HeaderComp(),
   signIn: SignInComp = SignInComp(),
-  signUp: SignUpComp = SignUpComp()
+  signUp: SignUpComp = SignUpComp(),
+  dashboard: DashboardComp = DashboardComp()
 )
 
 case class SignInComp(
@@ -26,9 +27,14 @@ case class SignUpComp(
   notification: Div = div(cls := "card-panel red darken-3 white-text", hidden, "User exists and/or inconsistent passwords!").render
 )
 
-case class HeaderComp (
+case class HeaderComp(
   signin: LI = li(a(href := "#signin", "sign in")).render,
   signUp: LI = li(a(href := "#signup", "sign up")).render,
   dashboard: LI = li(hidden, a(href := "#dashboard", "dashboard")).render,
   logout: LI = li(hidden, a(href := "#", "logout")).render
+)
+
+case class DashboardComp(
+  moviesList: UList = ul(cls := "collapsible popout", attr("data-collapsible") := "expandable").render,
+  searcher: Input = input(tpe := "text", id := "search-movie-input").render
 )
