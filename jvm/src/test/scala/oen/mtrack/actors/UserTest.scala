@@ -13,10 +13,10 @@ class UserTest() extends TestKit(ActorSystem("UserTest")) with ImplicitSender
   }
 
   val testName = "test321"
-  val exampleMovie1 = Movie(19, "Mr. Robot", Vector(Season(1, 10), Season(2, 10)), "/123.jpg", "/456.jpg", Season(1, 9))
-  val exampleMovie2 = Movie(322, "Dexter", Vector(Season(1, 12), Season(2, 12), Season(3, 12)), "/abc.jpg", "/def.jpg", Season(3, 12))
-  val exampleMovie3 = Movie(123, "Himym", Vector(Season(1, 24), Season(2, 24), Season(3, 24), Season(4, 24)), "/ha.jpg", "/hb.jpg")
-  val dataToUpdateMovie3 = Movie(123, "Himym", Vector(Season(1, 24), Season(2, 24), Season(3, 24), Season(4, 24), Season(5,24)), "/ha.jpg", "/hb.jpg")
+  val exampleMovie1 = Movie(19, "Mr. Robot", Vector(Season(1, 10), Season(2, 10)), Some("/123.jpg"), Some("/456.jpg"), Season(1, 9))
+  val exampleMovie2 = Movie(322, "Dexter", Vector(Season(1, 12), Season(2, 12), Season(3, 12)), Some("/abc.jpg"), Some("/def.jpg"), Season(3, 12))
+  val exampleMovie3 = Movie(123, "Himym", Vector(Season(1, 24), Season(2, 24), Season(3, 24), Season(4, 24)), Some("/ha.jpg"), Some("/hb.jpg"))
+  val dataToUpdateMovie3 = Movie(123, "Himym", Vector(Season(1, 24), Season(2, 24), Season(3, 24), Season(4, 24), Season(5,24)), Some("/ha.jpg"), Some("/hb.jpg"))
   val exampleMovies = Map(exampleMovie1.id -> exampleMovie1, exampleMovie2.id -> exampleMovie2)
 
   val exampleSearchMovie1 = SearchMovie(632, "Dragon", Some("/ssss.jpg"))
