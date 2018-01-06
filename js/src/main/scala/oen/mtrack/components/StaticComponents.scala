@@ -36,5 +36,6 @@ case class HeaderComp(
 
 case class DashboardComp(
   moviesList: UList = ul(cls := "collapsible popout", attr("data-collapsible") := "expandable").render,
-  searcher: Input = input(tpe := "text", id := "search-movie-input").render
+  searcher: Input = input(tpe := "text", id := "search-movie-input").render,
+  searchResults: UList = ul(cls := "collection scrollable-mini").render
 )

@@ -1,10 +1,10 @@
 package oen.mtrack.components
 
-import oen.mtrack.{Credential, Movies, Register}
+import oen.mtrack._
 import oen.mtrack.ajax.AjaxHelper
 import oen.mtrack.ajax.AjaxHelper.AjaxExceptionHandler
 import oen.mtrack.materialize.JQueryHelper
-import oen.mtrack.view.MovieListDresser
+import oen.mtrack.view.{MovieListDresser, SearchResultDresser}
 import org.scalajs.dom
 import org.scalajs.dom.XMLHttpRequest
 import org.scalajs.dom.raw.KeyboardEvent
@@ -14,7 +14,8 @@ class ComponentsLogic(staticComponents: StaticComponents,
                       jQueryHelper: JQueryHelper,
                       ajaxHelper: AjaxHelper,
                       localStorageService: LocalStorageService,
-                      htmlDresser: MovieListDresser) {
+                      movieListDresser: MovieListDresser,
+                      searchResultDresser: SearchResultDresser) {
 
   def init(): Unit = {
     initSignIn()
@@ -31,9 +32,51 @@ class ComponentsLogic(staticComponents: StaticComponents,
     def onSucced(m: Movies) = {
       cacheData.data = cacheData.data.copy(movies = m)
       staticComponents.dashboard.moviesList.innerHTML = ""
-      m.movies.map(htmlDresser.dressMovie(_, onUnauthorized)).foreach(staticComponents.dashboard.moviesList.appendChild)
+      m.movies.map(movieListDresser.dressMovie(_, onUnauthorized)).foreach(staticComponents.dashboard.moviesList.appendChild)
     }
     ajaxHelper.loadMovies(cacheData.data.token, onSucced, onUnauthorized)
+
+    initSearchMovie()
+  }
+
+  protected def initSearchMovie() = {
+    val dashboardComp = staticComponents.dashboard
+
+    var intervalId: Option[Int] = None
+
+    def onAddOrUpdateMovieSucced(movie: Movie) = {
+      val movieRow = movieListDresser.dressMovie(movie, onUnauthorized)
+      dashboardComp.moviesList.appendChild(movieRow)
+      dashboardComp.searcher.value = ""
+      dashboardComp.searchResults.innerHTML = ""
+    }
+
+    def onSearchSucced(searchMovies: SearchMovies) = {
+      for (m <- searchMovies.movies) {
+        val row = searchResultDresser.dressSearchResult(m) { id =>
+          ajaxHelper.addOrUpdate(cacheData.data.token, m.id, onAddOrUpdateMovieSucced, onUnauthorized)
+        }
+        dashboardComp.searchResults.appendChild(row)
+      }
+    }
+
+    def onStartSearch() = {
+      intervalId.foreach(dom.window.clearInterval)
+      dashboardComp.searchResults.innerHTML = ""
+      val query = dashboardComp.searcher.value
+      if (query.nonEmpty) {
+        ajaxHelper.search(
+          token = cacheData.data.token,
+          query = query,
+          onSucced = onSearchSucced,
+          onFailed = onUnauthorized)
+      }
+    }
+
+    dashboardComp.searcher.onkeyup = _ => {
+      intervalId.foreach(dom.window.clearInterval)
+      intervalId = Some(dom.window.setInterval(() => onStartSearch(), 500))
+    }
   }
 
   protected def initSignIn() = {

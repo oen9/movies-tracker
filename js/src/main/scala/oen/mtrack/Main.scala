@@ -17,6 +17,7 @@ object Main {
     val ajaxHelper = new AjaxHelper
     val cacheData = new CacheData()
     val htmlDresser = new MovieListDresser(jQueryHelper, ajaxHelper, cacheData)
+    val searchResultDresser = new SearchResultDresser
     val localStorageService = new LocalStorageService(cacheData)
     val staticComponents = new StaticComponents
 
@@ -28,7 +29,8 @@ object Main {
       jQueryHelper = jQueryHelper,
       ajaxHelper = ajaxHelper,
       localStorageService = localStorageService,
-      htmlDresser = htmlDresser
+      movieListDresser = htmlDresser,
+      searchResultDresser = searchResultDresser
     )
 
     val htmlContentRouter = new HtmlContentRouter(

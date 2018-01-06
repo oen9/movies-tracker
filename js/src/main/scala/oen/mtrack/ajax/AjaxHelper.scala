@@ -5,6 +5,7 @@ import oen.mtrack._
 import org.scalajs.dom.XMLHttpRequest
 import org.scalajs.dom.ext.{Ajax, AjaxException}
 
+import scala.scalajs.js.URIUtils
 import scala.util.{Failure, Success}
 
 class AjaxHelper {
@@ -82,6 +83,19 @@ class AjaxHelper {
   def removeMovie(token: Token, movieId: Int, onSucced: => Unit, onFailed: AjaxExceptionHandler): Unit = token.value.foreach { t =>
     Ajax.post(s"/movies/remove/$movieId?token=$t", headers = headers).onComplete {
       case Success(v) => onSucced
+      case Failure(x: AjaxException) => onFailed(x.xhr)
+      case Failure(e) => println(s"unexpected error: $e")
+    }
+  }
+
+  def search(token: Token, query: String, onSucced: SearchMovies => Unit, onFailed: AjaxExceptionHandler): Unit = token.value.foreach { t =>
+    val encodedQuery = URIUtils.encodeURI(query)
+    Ajax.get(s"/movies/search?token=$t&query=$encodedQuery", headers = headers).onComplete {
+      case Success(v) =>
+        Data.fromJson(v.responseText) match {
+          case m: SearchMovies => onSucced(m)
+          case e => println("unexpected: " + e)
+        }
       case Failure(x: AjaxException) => onFailed(x.xhr)
       case Failure(e) => println(s"unexpected error: $e")
     }

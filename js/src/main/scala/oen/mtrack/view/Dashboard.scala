@@ -44,7 +44,7 @@ class Dashboard(val cacheData: CacheData, dashboardComp: DashboardComp) extends 
         dashboardComp.searcher,
         label(`for` := "search-movie-input", "search movie")
       ),
-      searchResults,
+      dashboardComp.searchResults,
       dashboardComp.moviesList
     ).render
   }
