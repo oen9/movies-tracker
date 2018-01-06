@@ -6,8 +6,8 @@ import DefaultJsonProtocol._
 case class TmdbMovie(
   id: Int,
   name: String,
-  backdrop_path: String,
-  poster_path: String,
+  backdrop_path: Option[String],
+  poster_path: Option[String],
   seasons: IndexedSeq[TmdbSeason]
 )
 

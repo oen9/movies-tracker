@@ -68,8 +68,8 @@ class MovieListDresser(jQueryHelper: JQueryHelper, ajaxHelper: AjaxHelper, cache
       seasonCounter.innerHTML = s"${toFill.currentSeason.season}/${toFill.seasons.length}"
       episodeCounter.innerHTML = s"${toFill.currentSeason.episode}/$episodesInActiveSeason"
 
-      poster.setAttribute(src.name, s"https://image.tmdb.org/t/p/w150${toFill.poster}")
-      backdrop.setAttribute(src.name, s"https://image.tmdb.org/t/p/w300${toFill.backdrop}")
+      poster.setAttribute(src.name, ImageHelper.getSrcW150(toFill.poster))
+      backdrop.setAttribute(src.name, ImageHelper.getSrcW300(toFill.backdrop))
 
       val seasons = toFill.seasons
 

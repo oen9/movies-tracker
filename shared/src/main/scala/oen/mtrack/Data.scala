@@ -12,8 +12,8 @@ sealed trait Data
   id: Int,
   name: String,
   seasons: IndexedSeq[Season],
-  poster: String,
-  backdrop: String,
+  poster: Option[String],
+  backdrop: Option[String],
   currentSeason: Season = Season()
 ) extends Data
 @key("season") case class Season(season: Int = 1, episode: Int = 1) extends Data

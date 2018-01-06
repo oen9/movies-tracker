@@ -1,5 +1,5 @@
-val akkaVersion = "2.5.6"
-val akkaHttpVersion = "10.0.10"
+val akkaVersion = "2.5.8"
+val akkaHttpVersion = "10.0.11"
 
 lazy val app = crossProject.in(file(".")).settings(
   unmanagedSourceDirectories in Compile += baseDirectory.value  / "shared" / "main" / "scala",
