@@ -81,22 +81,26 @@ trait AppService {
 
   def login: Route = post {
     pathPrefix("login") {
-      entity(as[Data]) { data =>
-        onSuccess(authActor ? data) {
-          case t @ Token(Some(_)) => complete(t)
-          case _ => reject(AuthenticationFailedRejection(CredentialsRejected, HttpChallenge("none", None)))
-        }
+      entity(as[Data]) {
+        case c: Credential =>
+          onSuccess(authActor ? Auth.Login(c)) {
+            case t @ Token(Some(_)) => complete(t)
+            case _ => reject(AuthenticationFailedRejection(CredentialsRejected, HttpChallenge("none", None)))
+          }
+        case _ => complete(StatusCodes.BadRequest)
       }
     }
   }
 
   def register: Route = post {
     pathPrefix("register") {
-      entity(as[Data]) { data =>
-        onSuccess(authActor ? data) {
-          case RegisterSucced => complete(StatusCodes.Created)
-          case _ => complete(StatusCodes.Conflict)
-        }
+      entity(as[Data]) {
+        case Register(credential) =>
+          onSuccess(authActor ? Auth.TryRegister(credential)) {
+            case RegisterSucced => complete(StatusCodes.Created)
+            case _ => complete(StatusCodes.Conflict)
+          }
+        case _ => complete(StatusCodes.BadRequest)
       }
     }
   }
@@ -148,7 +152,8 @@ trait AppService {
   }
 
   def authenticator(token: String): Future[Option[ActorRef]] = {
-    (authActor ? Token(Some(token))).map {
+    val askCmd = Auth.GetUserRefByToken(Token(Some(token)))
+    (authActor ? askCmd).map {
       case Auth.UserRef(Some(ref)) => Some(ref)
       case _ => None
     }

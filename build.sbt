@@ -1,5 +1,5 @@
-val akkaVersion = "2.5.8"
-val akkaHttpVersion = "10.0.11"
+val akkaVersion = "2.5.12"
+val akkaHttpVersion = "10.1.1"
 
 lazy val app = crossProject.in(file(".")).settings(
   unmanagedSourceDirectories in Compile += baseDirectory.value  / "shared" / "main" / "scala",
@@ -7,11 +7,11 @@ lazy val app = crossProject.in(file(".")).settings(
     "com.lihaoyi" %%% "scalatags" % "0.6.7",
     "com.lihaoyi" %%% "upickle" % "0.4.4"
   ),
-  scalaVersion := "2.12.4",
+  scalaVersion := "2.12.6",
   name := "movies-tracker"
 ).jsSettings(
   libraryDependencies ++= Seq(
-    "org.scala-js" %%% "scalajs-dom" % "0.9.3",
+    "org.scala-js" %%% "scalajs-dom" % "0.9.5",
     "be.doeraene" %%% "scalajs-jquery" % "0.9.2"
   )
 ).jvmSettings(
@@ -21,12 +21,20 @@ lazy val app = crossProject.in(file(".")).settings(
     "com.typesafe.akka" %% "akka-stream" % akkaVersion,
     "com.typesafe.akka" %% "akka-slf4j" % akkaVersion,
     "com.typesafe.akka" %% "akka-http-spray-json" % akkaHttpVersion,
+    "com.typesafe.akka" %% "akka-persistence" % akkaVersion,
+
+    "com.github.romix.akka" %% "akka-kryo-serialization" % "0.5.2",
+    "org.iq80.leveldb" % "leveldb" % "0.7",
+    "org.fusesource.leveldbjni" % "leveldbjni-all" % "1.8",
+    "com.github.scullxbones" %% "akka-persistence-mongo-casbah" % "2.0.7",
+    "org.mongodb" %% "casbah" % "3.1.1",
 
     "ch.qos.logback" % "logback-classic" % "1.1.3",
     "org.mindrot" % "jbcrypt" % "0.4",
 
     "com.typesafe.akka" %% "akka-testkit" % akkaVersion % "test",
-    "org.scalatest" %% "scalatest" % "3.0.1" % "test"
+    "com.typesafe.akka" %% "akka-http-testkit" % akkaHttpVersion % "test",
+    "org.scalatest" %% "scalatest" % "3.0.5" % "test"
   )
 )
 

@@ -10,7 +10,7 @@ class SearchResultDresser {
     val searchResultRow = div(cls := "collection-item",
       div(cls := "row",
         div(cls := "col s6", h5(movie.name)),
-        div(cls := "col s6", img(src := ImageHelper.getSrcW150(movie.poster), height := 50))
+        div(cls := "col s6", img(src := ImageHelper.getSrcW300(movie.poster), height := 50))
       )
     ).render
     searchResultRow.onclick = _ => onClick(movie.id)

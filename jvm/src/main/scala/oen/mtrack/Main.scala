@@ -19,7 +19,7 @@ object Main extends App {
   implicit val system = ActorSystem("movies-tracker", config)
   implicit val materializer = ActorMaterializer()
 
-  val authActor = system.actorOf(Auth.props, Auth.name)
+  val authActor = system.actorOf(Auth.props(), Auth.name)
   val api = new AppServiceApi(system, authActor)
 
   val bindingFuture: Future[Http.ServerBinding] = Http().bindAndHandle(api.routes, host, port = port)

@@ -2,6 +2,7 @@ package oen.mtrack.view
 
 object ImageHelper {
 
+  @deprecated
   def getSrcW150(src: Option[String]): String = {
     getSrcWihtDefault(src, 150)
   }
