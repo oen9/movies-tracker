@@ -16,8 +16,9 @@ class HtmlContentRouter(componentsLogic: ComponentsLogic,
       case Some("signin") => signIn.get()
       case Some("signup") => signUp.get()
       case Some("dashboard") =>
+        val ret = dashboard.get()
         componentsLogic.init()
-        dashboard.get()
+        ret
       case _ => hello.get()
     }
   }

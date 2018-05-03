@@ -14,12 +14,13 @@ class Dashboard(val cacheData: CacheData, dashboardComp: DashboardComp) extends 
 
     var intervalId: Option[Int] = None
 
+    dashboardComp.searchResults.innerHTML = ""
+    dashboardComp.searcher.value = ""
     dashboardComp.searcher.onkeyup = _ => {
       intervalId.foreach(dom.window.clearInterval)
 
       intervalId = Some(dom.window.setInterval(() => {
         intervalId.foreach(dom.window.clearInterval)
-        println(dashboardComp.searcher.value)
 
         searchResults.innerHTML = ""
         val sValue = dashboardComp.searcher.value
