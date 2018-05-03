@@ -30,13 +30,13 @@ class UserTest() extends TestKit(ActorSystem("UserTest")) with ImplicitSender
     }
 
     "return movies list" in {
-      val user = system.actorOf(User.props(testName, exampleMovies))
+      val user = system.actorOf(User.props("testMoviesList", exampleMovies))
       user ! User.GetMovies
       expectMsg(Movies(IndexedSeq(exampleMovie1, exampleMovie2)))
     }
 
     "remove movie" in {
-      val user = system.actorOf(User.props(testName, exampleMovies))
+      val user = system.actorOf(User.props("testRemoveMovie", exampleMovies))
       user ! User.RemoveMovie(exampleMovie1.id)
       expectMsg(User.Success)
       user ! User.GetMovies
@@ -44,7 +44,7 @@ class UserTest() extends TestKit(ActorSystem("UserTest")) with ImplicitSender
     }
 
     "update current season" in {
-      val user = system.actorOf(User.props(testName, exampleMovies))
+      val user = system.actorOf(User.props("testUpdateCurrentSeason", exampleMovies))
 
       val newSeason = Season(9, 99)
       user ! User.UpdateCurrentSeason(exampleMovie2.id, newSeason)
@@ -58,7 +58,7 @@ class UserTest() extends TestKit(ActorSystem("UserTest")) with ImplicitSender
     }
 
     "add new movie" in {
-      val props = Props(new User(testName, Map()) {
+      val props = Props(new User("testAddNewMovie", Map()) {
         override def fetchMovie(id: Int, toRespond: ActorRef): Unit = self ! User.ToAdd(toRespond, exampleMovie3)
       })
 
@@ -75,7 +75,7 @@ class UserTest() extends TestKit(ActorSystem("UserTest")) with ImplicitSender
       val testSeason = Season(2, 22)
       val updatedMovie = dataToUpdateMovie3.copy(id = testId, currentSeason = testSeason)
 
-      val props = Props(new User(testName, Map(exampleMovie3.id -> exampleMovie3.copy(currentSeason = testSeason))) {
+      val props = Props(new User("testUpdateWithoutChangingSeason", Map(exampleMovie3.id -> exampleMovie3.copy(currentSeason = testSeason))) {
         override def fetchMovie(id: Int, toRespond: ActorRef): Unit = self ! User.ToAdd(toRespond, dataToUpdateMovie3.copy(id = id))
       })
 
@@ -88,7 +88,7 @@ class UserTest() extends TestKit(ActorSystem("UserTest")) with ImplicitSender
     }
 
     "search movies by query" in {
-      val props = Props(new User(testName, exampleMovies) {
+      val props = Props(new User("testSearchMovies", exampleMovies) {
         override def search(query: String, toRespond: ActorRef): Unit = toRespond ! SearchMovies(IndexedSeq(exampleSearchMovie1))
       })
 

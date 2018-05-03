@@ -118,7 +118,7 @@ trait AppService {
 
   def moviesOperations: Route = pathPrefix("movies") {
     auth(authenticator) { user =>
-      def askUser(cmd: User.cmd): Route = {
+      def askUser(cmd: User.Cmd): Route = {
         onSuccess(user ? cmd) {
           case m: Data => complete(m)
           case User.Success => complete(StatusCodes.NoContent)

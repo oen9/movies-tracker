@@ -2,35 +2,53 @@ package oen.mtrack.actors
 
 import java.net.URLEncoder
 
-import akka.actor.{Actor, ActorRef, Props}
+import akka.actor.{ActorRef, Props}
 import akka.http.scaladsl.Http
 import akka.http.scaladsl.model.HttpRequest
 import akka.http.scaladsl.unmarshalling.Unmarshal
+import akka.persistence.RecoveryCompleted
 import akka.stream.{ActorMaterializer, ActorMaterializerSettings}
-import oen.mtrack.actors.User._
-import oen.mtrack.json.{TmdbMovie, TmdbSearchResult}
+import com.mongodb.BasicDBObject
 import oen.mtrack._
+import oen.mtrack.actors.User._
+import oen.mtrack.json.Data._
+import oen.mtrack.json.{TmdbMovie, TmdbSearchResult}
+import spray.json.DefaultJsonProtocol._
+import spray.json.{DefaultJsonProtocol, RootJsonFormat}
 
-class User(name: String, var movies: Map[Int, Movie]) extends Actor {
+class User(name: String, var movies: Map[Int, Movie]) extends MongoObjectPersistentActor {
   final implicit val materializer: ActorMaterializer = ActorMaterializer(ActorMaterializerSettings(context.system))
   val tmdbApiKey: String = context.system.settings.config.getString("tmdb.api.key")
 
-  override def receive = {
+  override def persistenceId: String = name
+
+  override def jsonParsers: Set[(String, RootJsonFormat[_])] =
+    Set(
+      "movieAdded" -> movieAddedFormat,
+      "movieRemoved" -> movieRemovedFormat,
+      "currentSeasonUpdated" -> currentSeasonUpdatedFormat
+    )
+
+  override def receiveRecover: Receive = {
+    case mongoObj: BasicDBObject =>
+      readMongoEvent(mongoObj) match {
+        case e: Evt => updateState(e)
+        case unexpected => log.warning("unexpected recovery from BasicDBObject: {}", unexpected)
+      }
+    case RecoveryCompleted => // do nothing
+    case unexpected => log.warning("unexpected recovery: {}", unexpected)
+  }
+
+  override def receiveCommand: Receive = {
     case GetName =>
       sender() ! name
 
     case GetMovies =>
       sender() ! Movies(movies.values.toVector)
 
-    case RemoveMovie(id) =>
-      movies = movies - id
-      sender() ! Success
-
-    case UpdateCurrentSeason(id, season) =>
-      movies.get(id).foreach { m =>
-        movies = movies + (id -> m.copy(currentSeason = season))
-      }
-      sender() ! Success
+    case Search(query) =>
+      val toRespond = sender()
+      search(query, toRespond)
 
     case AddOrUpdateMovie(id) =>
       val toRespond = sender()
@@ -38,12 +56,35 @@ class User(name: String, var movies: Map[Int, Movie]) extends Actor {
 
     case ToAdd(toResponse, m) =>
       val newOrUpdatedMovie = movies.get(m.id).fold(m)(oldM => m.copy(currentSeason = oldM.currentSeason))
-      movies = movies + (m.id -> newOrUpdatedMovie)
-      toResponse ! newOrUpdatedMovie
+      persistAsJson(MovieAdded(newOrUpdatedMovie))(ma => {
+        updateState(ma)
+        toResponse ! ma.movie
+      })
 
-    case Search(query) =>
+    case RemoveMovie(id) =>
       val toRespond = sender()
-      search(query, toRespond)
+      persistAsJson(MovieRemoved(id))(removed => {
+        updateState(removed)
+        toRespond ! Success
+      })
+
+    case UpdateCurrentSeason(id, season) =>
+      val toRespond = sender()
+      persistAsJson(CurrentSeasonUpdated(id, season))(season => {
+        updateState(season)
+        toRespond ! Success
+      })
+  }
+
+  def updateState(evt: Evt) = evt match {
+    case added: MovieAdded =>
+      movies = movies + (added.movie.id -> added.movie)
+    case removed: MovieRemoved =>
+      movies = movies - removed.id
+    case CurrentSeasonUpdated(id, season) =>
+      movies.get(id).foreach { m =>
+        movies = movies + (id -> m.copy(currentSeason = season))
+      }
   }
 
   def fetchMovie(id: Int, toRespond: ActorRef): Unit = {
@@ -98,14 +139,23 @@ object User {
   def props(name: String, movies: Map[Int, Movie] = Map()) = Props(new User(name, movies))
   def name(username: String) = s"user-$username"
 
-  trait cmd
-  case object GetName extends cmd
-  case object GetMovies extends cmd
-  case object Success extends cmd
-  case class AddOrUpdateMovie(id: Int) extends cmd
-  case class RemoveMovie(id: Int) extends cmd
-  case class UpdateCurrentSeason(id: Int, season: Season) extends cmd
-  case class Search(query: String) extends cmd
+  sealed trait Cmd
+  case object GetName extends Cmd
+  case object GetMovies extends Cmd
+  case class AddOrUpdateMovie(id: Int) extends Cmd
+  case class RemoveMovie(id: Int) extends Cmd
+  case class UpdateCurrentSeason(id: Int, season: Season) extends Cmd
+  case class Search(query: String) extends Cmd
+
+  sealed trait Evt
+  case class MovieAdded(movie: Movie) extends Evt
+  case class MovieRemoved(id: Int) extends Evt
+  case class CurrentSeasonUpdated(id: Int, season: Season) extends Evt
+
+  implicit val currentSeasonUpdatedFormat = DefaultJsonProtocol.jsonFormat2(CurrentSeasonUpdated)
+  implicit val movieRemovedFormat = DefaultJsonProtocol.jsonFormat1(MovieRemoved)
+  implicit val movieAddedFormat = DefaultJsonProtocol.jsonFormat1(MovieAdded)
 
   case class ToAdd(toResponse: ActorRef, movie: Movie)
+  case object Success
 }

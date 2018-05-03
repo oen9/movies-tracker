@@ -29,7 +29,7 @@ class Auth(val persistenceId: String) extends MongoObjectPersistentActor {
   override def receiveRecover: Receive = {
     case mongoObj: BasicDBObject =>
       readMongoEvent(mongoObj) match {
-        case r: Registered => updateState(r)
+        case e: Evt => updateState(e)
         case unexpected => log.warning("unexpected recovery from BasicDBObject: {}", unexpected)
       }
     case RecoveryCompleted => // do nothing
